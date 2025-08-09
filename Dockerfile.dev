@@ -1,0 +1,34 @@
+# Development Dockerfile with hot reload
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install development dependencies
+RUN apk add --no-cache git
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm install
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p user_data public/css public/js views && \
+    chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Start in development mode with hot reload
+CMD ["npm", "run", "dev:dashboard"]

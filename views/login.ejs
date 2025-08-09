@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solana Trading Bot - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Arial", sans-serif;
+        color: white;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .logo {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #00d4ff, #667eea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+      }
+
+      .privacy-notice {
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: left;
+      }
+
+      .privacy-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #00d4ff;
+      }
+
+      .privacy-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .privacy-list li {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .privacy-list i {
+        color: #00ff88;
+        width: 16px;
+      }
+
+      .login-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        background: linear-gradient(135deg, #5a6fd8, #6a4190);
+      }
+
+      .session-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .feature-card i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #00d4ff;
+      }
+
+      .feature-card h3 {
+        font-size: 1rem;
+        margin-bottom: 5px;
+      }
+
+      .feature-card p {
+        font-size: 0.8rem;
+        opacity: 0.8;
+      }
+
+      @media (max-width: 768px) {
+        .login-container {
+          padding: 30px 20px;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+      }
+
+      /* Footer Styles */
+      .footer-overlay {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+      }
+
+      .open-source-banner {
+        padding: 15px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .banner-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .banner-text h3 {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: #00d4ff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .banner-text p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin: 0;
+      }
+
+      .donation-section {
+        text-align: right;
+      }
+
+      .donation-label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        opacity: 0.9;
+      }
+
+      .wallet-address {
+        background: rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(102, 126, 234, 0.4);
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 280px;
+      }
+
+      .wallet-address:hover {
+        background: rgba(102, 126, 234, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .address-text {
+        font-family: "Courier New", monospace;
+        font-size: 0.8rem;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .wallet-address i {
+        color: #00d4ff;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        .banner-content {
+          flex-direction: column;
+          text-align: center;
+          gap: 15px;
+        }
+
+        .donation-section {
+          text-align: center;
+        }
+
+        .wallet-address {
+          max-width: 100%;
+        }
+
+        .address-text {
+          font-size: 0.7rem;
+        }
+      }
+
+      .website-link {
+        color: #00d4ff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .website-link:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      .website-link-text {
+        font-size: 0.85rem;
+        margin-top: 5px;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo">
+        <i class="fas fa-robot"></i>
+      </div>
+
+      <h1>Solana Trading Bot</h1>
+      <p class="subtitle">Automated Token Trading Platform</p>
+
+      <div class="privacy-notice">
+        <div class="privacy-title">
+          <i class="fas fa-shield-alt"></i>
+          <span>Privacy & Security</span>
+        </div>
+        <ul class="privacy-list">
+          <li><i class="fas fa-check"></i> Nothing is saved permanently on our servers</li>
+          <li><i class="fas fa-check"></i> Your data is isolated from other users</li>
+          <li><i class="fas fa-check"></i> Session expires after 24 hours automatically</li>
+          <li><i class="fas fa-check"></i> All data is deleted when you logout</li>
+          <li><i class="fas fa-check"></i> Private keys are stored securely in memory only</li>
+        </ul>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="fas fa-cogs"></i>
+          <h3>Multi-Bot Support</h3>
+          <p>Run up to 3 bots with different strategies</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-chart-line"></i>
+          <h3>Real-time Monitoring</h3>
+          <p>Live logs and status updates</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-sliders-h"></i>
+          <h3>Configurable</h3>
+          <p>Customize trading parameters</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-lock"></i>
+          <h3>Secure</h3>
+          <p>Private session isolation</p>
+        </div>
+      </div>
+
+      <button class="login-btn" onclick="startSession()"><i class="fas fa-sign-in-alt"></i> Start Trading Session</button>
+
+      <div class="session-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Session Info:</strong> You'll get a temporary session that lasts 24 hours. All your trading configurations and data will be
+        automatically cleaned up when you logout or session expires.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-overlay">
+      <div class="open-source-banner">
+        <div class="banner-content">
+          <div class="banner-text">
+            <h3><i class="fas fa-code"></i> Open Source Project by AntCoders</h3>
+            <p>Free Solana trading bot - Support our development</p>
+            <p class="website-link-text">
+              <i class="fas fa-globe"></i> Visit us: <a href="https://antcoders.dev/" target="_blank" class="website-link">antcoders.dev</a>
+            </p>
+          </div>
+          <div class="donation-section">
+            <p class="donation-label">☕ Buy us a coffee:</p>
+            <div class="wallet-address" onclick="copyWalletAddress()">
+              <span class="address-text">66SZQA9sMcjB6am9jvUkUyCwCv6UXCZWdthDN5M7CDXm</span>
+              <i class="fas fa-copy"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function startSession() {
+        // Add loading state
+        const btn = document.querySelector(".login-btn");
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Session...';
+        btn.disabled = true;
+
+        // Simulate loading and redirect
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      }
+
+      // Copy wallet address function
+      function copyWalletAddress() {
+        const address = "66SZQA9sMcjB6am9jvUkUyCwCv6UXCZWdthDN5M7CDXm";
+
+        if (navigator.clipboard) {
+          navigator.clipboard
+            .writeText(address)
+            .then(() => {
+              showNotification("✅ Wallet address copied! Thank you for supporting us! 🙏");
+            })
+            .catch(() => {
+              fallbackCopy(address);
+            });
+        } else {
+          fallbackCopy(address);
+        }
+      }
+
+      // Fallback copy method
+      function fallbackCopy(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          document.execCommand("copy");
+          showNotification("✅ Wallet address copied! Thank you for supporting us! 🙏");
+        } catch (err) {
+          showNotification("❌ Failed to copy. Please copy manually.");
+        }
+
+        document.body.removeChild(textArea);
+      }
+
+      // Show notification
+      function showNotification(message) {
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: rgba(0, 212, 255, 0.9);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          font-weight: bold;
+          z-index: 10000;
+          animation: slideIn 0.3s ease;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+          notification.style.animation = "slideOut 0.3s ease";
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      // Add some interactive animations
+      document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll(".feature-card");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.1}s`;
+          card.style.animation = "fadeInUp 0.6s ease forwards";
+        });
+      });
+
+      // Add fadeInUp animation
+      const style = document.createElement("style");
+      style.textContent = `
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+        
+        .feature-card {
+          opacity: 0;
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>

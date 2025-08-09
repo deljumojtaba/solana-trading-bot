@@ -1,0 +1,58 @@
+{
+  "name": "solana-trading-bot",
+  "version": "1.0.0",
+  "description": "Solana trading bot to generate token activity",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "bot1": "node src/index.js .env",
+    "bot2": "node src/index.js .env.bot2",
+    "bot3": "node src/index.js .env.bot3",
+    "start-all": "./bots.sh start",
+    "stop-all": "./bots.sh stop",
+    "status": "./bots.sh status",
+    "logs": "./bots.sh logs",
+    "watch": "./bots.sh watch",
+    "dashboard": "node src/dashboard.js",
+    "dashboard:clean": "node clear-data.js && node src/dashboard.js",
+    "dev:dashboard": "node --watch src/dashboard.js",
+    "clear-data": "node clear-data.js",
+    "docker:build": "./docker-scripts.sh build",
+    "docker:start": "./docker-scripts.sh start",
+    "docker:start-dev": "./docker-scripts.sh start-dev",
+    "docker:stop": "./docker-scripts.sh stop",
+    "docker:restart": "./docker-scripts.sh restart",
+    "docker:logs": "./docker-scripts.sh logs",
+    "docker:clean": "./docker-scripts.sh clean",
+    "docker:status": "./docker-scripts.sh status"
+  },
+  "keywords": [
+    "solana",
+    "trading",
+    "bot",
+    "cryptocurrency"
+  ],
+  "author": {
+    "name": "AntCoders Team",
+    "url": "https://antcoders.dev/",
+    "email": "info@antcoders.dev"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.6",
+    "axios": "^1.6.2",
+    "bs58": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0"
+  }
+}

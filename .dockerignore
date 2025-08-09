@@ -1,0 +1,66 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# User data (will be mounted as volume)
+user_data/*
+
+# Development files
+.git
+.gitignore
+*.md
+.vscode
+.DS_Store
+
+# Logs
+*.log
+bot*.log
+
+# Environment files (will be mounted separately)
+.env.local
+.env.development
+.env.test
+
+# Temporary files
+tmp
+temp
+.tmp
+.temp
+
+# Test files
+test
+tests
+__tests__
+*.test.js
+*.spec.js
+
+# Documentation
+docs
+*.md
+LICENSE
+
+# IDE files
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+
+# Build artifacts
+dist
+build
+coverage
+
+# Development utilities
+add-debug-logging.js
+setup-user-json.js
+
+# Backup files
+*-old.js
+*-backup.js
+
+# Other
+cookies.txt

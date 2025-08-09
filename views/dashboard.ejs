@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="/css/dashboard.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1><i class="fas fa-robot"></i> Solana Trading Bot Dashboard</h1>
+          <div class="header-stats">
+            <div class="stat-card">
+              <i class="fas fa-play-circle"></i>
+              <span id="running-count"><%= status.runningBots %></span>
+              <small>Running Bots</small>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-file-alt"></i>
+              <span id="logs-count"><%= status.totalLogs %></span>
+              <small>Total Logs</small>
+            </div>
+            <div class="stat-card session-info">
+              <i class="fas fa-user-shield"></i>
+              <span id="session-id"><%= userId ? userId.substring(0, 8) + '...' : 'Guest' %></span>
+              <small>User Session</small>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-outline logout-btn" onclick="showLogoutConfirmation()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Bot Controls -->
+        <section class="bot-controls">
+          <h2><i class="fas fa-cogs"></i> Bot Management</h2>
+          <div class="control-buttons">
+            <button class="btn btn-success" onclick="startAllBots()"><i class="fas fa-play"></i> Start All Bots</button>
+            <button class="btn btn-danger" onclick="stopAllBots()"><i class="fas fa-stop"></i> Stop All Bots</button>
+            <button class="btn btn-info" onclick="refreshStatus()"><i class="fas fa-sync-alt"></i> Refresh</button>
+          </div>
+        </section>
+
+        <!-- Bot Status Cards -->
+        <section class="bot-status">
+          <h2><i class="fas fa-tachometer-alt"></i> Bot Status</h2>
+          <div class="bot-grid" id="bot-grid">
+            <% status.bots.forEach(bot => { %>
+            <div class="bot-card <%= bot.status %>" data-bot-id="<%= bot.id %>">
+              <div class="bot-header">
+                <h3><%= bot.name %></h3>
+                <div class="bot-status-indicator <%= bot.status %>">
+                  <% if (bot.status === 'running') { %>
+                  <i class="fas fa-circle"></i> Running <% } else { %> <i class="fas fa-circle"></i> Stopped <% } %>
+                </div>
+              </div>
+              <div class="bot-details">
+                <p><strong>Config:</strong> <%= bot.config %></p>
+                <p><strong>ID:</strong> <%= bot.id %></p>
+              </div>
+              <div class="bot-actions">
+                <% if (bot.status === 'running') { %>
+                <button class="btn btn-sm btn-danger" onclick="stopBot('<%= bot.id %>')"><i class="fas fa-stop"></i> Stop</button>
+                <% } else { %>
+                <button class="btn btn-sm btn-success" onclick="startBot('<%= bot.id %>')"><i class="fas fa-play"></i> Start</button>
+                <% } %>
+              </div>
+            </div>
+            <% }); %>
+          </div>
+        </section>
+
+        <!-- Bot Configuration -->
+        <section class="bot-configuration">
+          <h2><i class="fas fa-cog"></i> Bot Configuration</h2>
+
+          <!-- Configuration Info Banner -->
+          <div class="config-info-banner">
+            <div class="info-content">
+              <i class="fas fa-info-circle"></i>
+              <div class="info-text">
+                <strong>Configuration Guide:</strong> Hover over the <i class="fas fa-question-circle info-icon"></i> icons below to learn about each
+                setting. Each bot can have different configurations for various trading strategies.
+              </div>
+            </div>
+          </div>
+
+          <div class="config-tabs">
+            <button class="tab-button active" onclick="showConfigTab('bot1')">
+              Bot 1 - Balanced
+              <span class="bot-tooltip" data-tooltip="Balanced strategy with 60% buy orders and 40% sell orders. Good for steady market activity.">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            </button>
+            <button class="tab-button" onclick="showConfigTab('bot2')">
+              Bot 2 - Aggressive
+              <span class="bot-tooltip" data-tooltip="Aggressive strategy with 75% buy orders and 25% sell orders. Creates strong buying pressure.">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            </button>
+            <button class="tab-button" onclick="showConfigTab('bot3')">
+              Bot 3 - Conservative
+              <span class="bot-tooltip" data-tooltip="Conservative strategy with 55% buy orders and 45% sell orders. Minimal price impact.">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            </button>
+          </div>
+
+          <div class="config-forms">
+            <% ['bot1', 'bot2', 'bot3'].forEach((botId, index) => { %>
+            <div class="config-form <%= index === 0 ? 'active' : '' %>" id="config-<%= botId %>">
+              <form onsubmit="saveBotConfig('<%= botId %>', event)">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="<%= botId %>-private-key">
+                      <i class="fas fa-key"></i> Private Key
+                      <span
+                        class="field-tooltip"
+                        data-tooltip="Your wallet's private key. Supports two formats:&#10;1. Comma-separated bytes: [123,45,67,...]&#10;2. Base58 string: 2zQ8v...&#10;&#10;⚠️ Keep this secure and never share it!"
+                      >
+                        <i class="fas fa-question-circle"></i>
+                      </span>
+                    </label>
+                    <div class="private-key-container">
+                      <textarea
+                        id="<%= botId %>-private-key"
+                        name="privateKey"
+                        placeholder="Your private key here..."
+                        required
+                        class="private-key-input"
+                      ></textarea>
+                      <div id="<%= botId %>-private-key-masked" class="private-key-masked" style="display: none"></div>
+                      <button type="button" class="toggle-visibility-btn" onclick="togglePrivateKeyVisibility('<%= botId %>')">
+                        <i class="fas fa-eye" id="<%= botId %>-eye-icon"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="<%= botId %>-token-address">
+                      <i class="fas fa-coins"></i> Token Address
+                      <span
+                        class="field-tooltip"
+                        data-tooltip="The Solana token address you want to trade.&#10;Default: CV9oNz7rjTqCsWHHgqWhoZaaw1LSX96H81Vk5p94Hc2E&#10;&#10;💡 Make sure this is the correct token address!"
+                      >
+                        <i class="fas fa-question-circle"></i>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="<%= botId %>-token-address"
+                      name="tokenAddress"
+                      placeholder="CV9oNz7rjTqCsWHHgqWhoZaaw1LSX96H81Vk5p94Hc2E"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="<%= botId %>-rpc-url">
+                      <i class="fas fa-network-wired"></i> RPC URL
+                      <span
+                        class="field-tooltip"
+                        data-tooltip="Solana RPC endpoint for blockchain connection.&#10;&#10;Options:&#10;• Mainnet: https://api.mainnet-beta.solana.com&#10;• Devnet: https://api.devnet.solana.com&#10;• Custom RPC for better performance&#10;&#10;💡 Use devnet for testing!"
+                      >
+                        <i class="fas fa-question-circle"></i>
+                      </span>
+                    </label>
+                    <input type="url" id="<%= botId %>-rpc-url" name="rpcUrl" placeholder="https://api.mainnet-beta.solana.com" />
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="<%= botId %>-sol-min">
+                        <i class="fas fa-coins"></i> SOL Min
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Minimum SOL amount per trade.&#10;&#10;Examples:&#10;• 0.001 SOL = Small trades&#10;• 0.01 SOL = Medium trades&#10;• 0.1 SOL = Large trades&#10;&#10;⚠️ Start small for testing!"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input type="number" id="<%= botId %>-sol-min" name="solAmountMin" step="0.001" placeholder="0.001" />
+                    </div>
+                    <div class="form-group">
+                      <label for="<%= botId %>-sol-max">
+                        <i class="fas fa-coins"></i> SOL Max
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Maximum SOL amount per trade.&#10;&#10;The bot will randomly choose amounts between Min and Max.&#10;&#10;💡 Larger range = more natural trading patterns"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input type="number" id="<%= botId %>-sol-max" name="solAmountMax" step="0.001" placeholder="0.01" />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="<%= botId %>-interval-min">
+                        <i class="fas fa-clock"></i> Interval Min (s)
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Minimum seconds between trades.&#10;&#10;Examples:&#10;• 30s = Very active trading&#10;• 60s = Active trading&#10;• 300s = Slow trading&#10;&#10;⚠️ Too fast may look suspicious!"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input type="number" id="<%= botId %>-interval-min" name="tradeIntervalMin" placeholder="30" />
+                    </div>
+                    <div class="form-group">
+                      <label for="<%= botId %>-interval-max">
+                        <i class="fas fa-clock"></i> Interval Max (s)
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Maximum seconds between trades.&#10;&#10;The bot will randomly wait between Min and Max intervals.&#10;&#10;💡 Random timing looks more natural!"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input type="number" id="<%= botId %>-interval-max" name="tradeIntervalMax" placeholder="300" />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="<%= botId %>-buy-percentage">
+                        <i class="fas fa-percentage"></i> Buy Percentage
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Percentage of buy orders vs sell orders.&#10;&#10;Examples:&#10;• 80% = 80% buy, 20% sell (bullish)&#10;• 60% = 60% buy, 40% sell (balanced)&#10;• 50% = 50% buy, 50% sell (neutral)&#10;&#10;💡 Higher % creates buying pressure!"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input
+                        type="number"
+                        id="<%= botId %>-buy-percentage"
+                        name="buyPercentage"
+                        min="1"
+                        max="99"
+                        placeholder="<%= index === 0 ? '60' : index === 1 ? '75' : '55' %>"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="<%= botId %>-max-slippage">
+                        <i class="fas fa-chart-line"></i> Max Slippage
+                        <span
+                          class="field-tooltip"
+                          data-tooltip="Maximum price slippage tolerance.&#10;&#10;Examples:&#10;• 0.01 = 1% slippage (strict)&#10;• 0.05 = 5% slippage (normal)&#10;• 0.10 = 10% slippage (flexible)&#10;&#10;⚠️ Higher slippage = higher costs!"
+                        >
+                          <i class="fas fa-question-circle"></i>
+                        </span>
+                      </label>
+                      <input type="number" id="<%= botId %>-max-slippage" name="maxSlippage" step="0.01" placeholder="0.05" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="<%= botId %>-min-sol-balance">
+                      <i class="fas fa-wallet"></i> Min SOL Balance
+                      <span
+                        class="field-tooltip"
+                        data-tooltip="Minimum SOL balance to maintain in wallet.&#10;&#10;The bot will stop trading when SOL drops below this amount.&#10;&#10;💡 Keep enough for transaction fees!&#10;⚠️ Recommended: at least 0.1 SOL"
+                      >
+                        <i class="fas fa-question-circle"></i>
+                      </span>
+                    </label>
+                    <input type="number" id="<%= botId %>-min-sol-balance" name="minSolBalance" step="0.01" placeholder="0.1" />
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" onclick="loadBotConfig('<%= botId %>')">
+                    <i class="fas fa-download"></i> Load Current
+                  </button>
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Configuration</button>
+                </div>
+              </form>
+            </div>
+            <% }) %>
+          </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section class="logs-section">
+          <div class="logs-header">
+            <h2><i class="fas fa-terminal"></i> Real-time Logs</h2>
+            <div class="logs-controls">
+              <button class="btn btn-sm btn-secondary" onclick="clearLogDisplay()"><i class="fas fa-trash"></i> Clear Display</button>
+              <button class="btn btn-sm btn-info" onclick="toggleAutoScroll()">
+                <i class="fas fa-arrows-alt-v"></i> <span id="autoscroll-text">Auto Scroll: ON</span>
+              </button>
+            </div>
+          </div>
+          <div class="logs-container" id="logs-container">
+            <% logs.forEach(log => { %>
+            <div class="log-entry <%= log.type %>" data-bot="<%= log.bot %>">
+              <span class="log-timestamp"><%= new Date(log.timestamp).toLocaleTimeString() %></span>
+              <span class="log-bot bot-<%= log.bot %>"><%= log.bot.toUpperCase() %></span>
+              <span class="log-message"><%= log.message %></span>
+            </div>
+            <% }); %>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4><i class="fas fa-code"></i> Open Source Project</h4>
+            <p>Made with ❤️ by <strong>AntCoders Team</strong></p>
+            <p>Free and open source Solana trading bot</p>
+            <p><i class="fas fa-globe"></i> <a href="https://antcoders.dev/" target="_blank" class="website-link">antcoders.dev</a></p>
+          </div>
+
+          <div class="footer-section">
+            <h4><i class="fas fa-heart"></i> Support Development</h4>
+            <p>If this bot helps you succeed, consider supporting our work:</p>
+            <div class="donation-address">
+              <i class="fas fa-wallet"></i>
+              <span class="address" onclick="copyAddress()" title="Click to copy"> 66SZQA9sMcjB6am9jvUkUyCwCv6UXCZWdthDN5M7CDXm </span>
+              <i class="fas fa-copy copy-icon" onclick="copyAddress()"></i>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4><i class="fas fa-star"></i> Community</h4>
+            <p>⭐ Star us on GitHub</p>
+            <p>🐛 Report issues & suggest features</p>
+            <p>🤝 Contribute to the project</p>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2024 AntCoders Team. Open Source MIT License.</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-exclamation-triangle"></i> Confirm Logout</h2>
+        </div>
+
+        <div class="modal-body">
+          <div class="warning-message">
+            <div class="warning-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="warning-text">
+              <h3>What happens when you logout:</h3>
+              <ul class="logout-actions">
+                <li><i class="fas fa-stop-circle text-danger"></i> All running bots will be stopped automatically</li>
+                <li><i class="fas fa-trash text-warning"></i> Your configuration files will be deleted</li>
+                <li><i class="fas fa-history text-info"></i> All logs and session data will be cleared</li>
+                <li><i class="fas fa-user-times text-secondary"></i> Your session will be terminated</li>
+              </ul>
+
+              <div class="privacy-reminder">
+                <i class="fas fa-info-circle"></i>
+                <strong>Privacy Note:</strong> Nothing is saved permanently. All your data will be completely removed from our servers.
+              </div>
+
+              <div id="running-bots-warning" class="bots-warning" style="display: none">
+                <i class="fas fa-robot text-danger"></i>
+                <strong>Warning:</strong> You have <span id="running-bots-count">0</span> bot(s) currently running!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideLogoutConfirmation()"><i class="fas fa-times"></i> Cancel</button>
+          <button class="btn btn-danger" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Yes, Logout & Clear Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/dashboard.js"></script>
+  </body>
+</html>

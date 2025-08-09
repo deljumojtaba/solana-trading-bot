@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  # Solana Trading Bot for Production with nginx-proxy
+  solana-trading-bot:
+    build: .
+    container_name: solana-trading-bot-prod
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CLEAR_DATA_ON_STARTUP=false
+      # Virtual host for nginx-proxy
+      - VIRTUAL_HOST=solana-trading-bot.antcoders.dev
+      - VIRTUAL_PORT=3000
+      # Let's Encrypt settings
+      - LETSENCRYPT_HOST=solana-trading-bot.antcoders.dev
+      - LETSENCRYPT_EMAIL=antcoderstoken@gmail.com
+    volumes:
+      # Persist user data (optional - remove for ephemeral sessions)
+      - ./user_data:/app/user_data
+      # Mount config files if using .env mode
+      - ./.env:/app/.env:ro
+      - ./.env.bot2:/app/.env.bot2:ro
+      - ./.env.bot3:/app/.env.bot3:ro
+    restart: unless-stopped
+    networks:
+      - nginx-proxy
+      - solana-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/api/status', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      # nginx-proxy labels
+      - "nginx-proxy.virtual.host=solana-trading-bot.antcoders.dev"
+      - "nginx-proxy.virtual.port=3000"
+      # Let's Encrypt labels
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
+
+networks:
+  nginx-proxy:
+    external: true
+  solana-network:
+    driver: bridge
+
+volumes:
+  user_data:
+    driver: local
