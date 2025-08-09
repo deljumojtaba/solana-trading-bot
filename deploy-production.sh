@@ -27,8 +27,15 @@ fi
 case "$1" in
     "deploy"|"start")
         echo -e "${YELLOW}📦 Building and starting services...${NC}"
-        docker-compose -f docker-compose.production.yml build
-        docker-compose -f docker-compose.production.yml up -d
+        
+        # Ensure user_data directory exists and has correct permissions
+        echo -e "${YELLOW}🔧 Setting up user_data directory permissions...${NC}"
+        mkdir -p ./user_data
+        sudo chown -R 1000:1000 ./user_data
+        sudo chmod -R 755 ./user_data
+        
+        docker compose -f docker-compose.production.yml build
+        docker compose -f docker-compose.production.yml up -d
         echo -e "${GREEN}✅ Deployment complete!${NC}"
         echo -e "${GREEN}🌐 Your bot is now available at: https://solana-trading-bot.antcoders.dev${NC}"
         echo -e "${YELLOW}⏳ SSL certificate may take a few minutes to generate...${NC}"
@@ -36,25 +43,32 @@ case "$1" in
     
     "stop")
         echo -e "${YELLOW}🛑 Stopping services...${NC}"
-        docker-compose -f docker-compose.production.yml down
+        docker compose -f docker-compose.production.yml down
         echo -e "${GREEN}✅ Services stopped${NC}"
         ;;
     
     "restart")
         echo -e "${YELLOW}🔄 Restarting services...${NC}"
-        docker-compose -f docker-compose.production.yml down
-        docker-compose -f docker-compose.production.yml up -d
+        
+        # Ensure user_data directory has correct permissions
+        echo -e "${YELLOW}🔧 Fixing user_data directory permissions...${NC}"
+        mkdir -p ./user_data
+        sudo chown -R 1000:1000 ./user_data
+        sudo chmod -R 755 ./user_data
+        
+        docker compose -f docker-compose.production.yml down
+        docker compose -f docker-compose.production.yml up -d
         echo -e "${GREEN}✅ Services restarted${NC}"
         ;;
     
     "logs")
         echo -e "${YELLOW}📋 Showing logs...${NC}"
-        docker-compose -f docker-compose.production.yml logs -f
+        docker compose -f docker-compose.production.yml logs -f
         ;;
     
     "status")
         echo -e "${YELLOW}📊 Service Status:${NC}"
-        docker-compose -f docker-compose.production.yml ps
+        docker compose -f docker-compose.production.yml ps
         echo ""
         echo -e "${YELLOW}🌐 Checking domain status...${NC}"
         curl -s -o /dev/null -w "%{http_code}" https://solana-trading-bot.antcoders.dev || echo "Domain not responding"
@@ -63,17 +77,26 @@ case "$1" in
     "update")
         echo -e "${YELLOW}🔄 Updating and redeploying...${NC}"
         git pull
-        docker-compose -f docker-compose.production.yml build --no-cache
-        docker-compose -f docker-compose.production.yml up -d
+        docker compose -f docker-compose.production.yml build --no-cache
+        docker compose -f docker-compose.production.yml up -d
         echo -e "${GREEN}✅ Update complete!${NC}"
         ;;
     
     "cleanup")
         echo -e "${YELLOW}🧹 Cleaning up old images and containers...${NC}"
-        docker-compose -f docker-compose.production.yml down
+        docker compose -f docker-compose.production.yml down
         docker system prune -f
         docker image prune -f
         echo -e "${GREEN}✅ Cleanup complete${NC}"
+        ;;
+    
+    "fix-permissions")
+        echo -e "${YELLOW}🔧 Fixing user_data directory permissions...${NC}"
+        mkdir -p ./user_data
+        sudo chown -R 1000:1000 ./user_data
+        sudo chmod -R 755 ./user_data
+        echo -e "${GREEN}✅ Permissions fixed${NC}"
+        echo -e "${YELLOW}Now restart the service: ./deploy-production.sh restart${NC}"
         ;;
     
     *)
@@ -90,6 +113,7 @@ case "$1" in
         echo "  status    - Show service status"
         echo "  update    - Pull latest code and redeploy"
         echo "  cleanup   - Clean up old containers and images"
+        echo "  fix-permissions - Fix user_data directory permissions"
         echo ""
         echo "Examples:"
         echo "  ./deploy-production.sh deploy"
